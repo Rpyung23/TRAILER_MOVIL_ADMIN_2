@@ -196,7 +196,7 @@ export default {
       nameUsuario: "SIN NOMBRE",
       mListaAlertasDispositivosNotificaciones: [],
       mListaAlertasDispositivosNotificacionesAux: [],
-      logo: "../img/brand/logo_login.png",
+      logo: "../img/brand/logo_login.jpg",
       activeNotifications: false,
       showMenu: false,
       searchModalVisible: false,

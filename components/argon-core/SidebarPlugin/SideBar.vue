@@ -5,7 +5,7 @@
        :data="backgroundColor">
     <div class="scrollbar-inner" ref="sidebarScrollArea">
       <div class="sidenav-header d-flex align-items-center">
-        <a class="navbar-brand" href="/dashboard" >
+        <a class="navbar-brand" href="/evento" >
           <img :src="logo" class="navbar-brand-img" alt="Sidebar logo">
         </a>
         <div class="ml-auto">
@@ -60,7 +60,7 @@ export default {
     },
     logo: {
       type: String,
-      default: './img/brand/logo_login.png',
+      default: './img/brand/logo_login.jpg',
       description: 'COMPOSTLAB app logo'
     },
     backgroundColor: {

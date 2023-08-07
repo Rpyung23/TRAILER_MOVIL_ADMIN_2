@@ -29,7 +29,7 @@
             <div class="card-header bg-transparent">
               <div class="text-muted text-center">
                 <small
-                  ><img src="/img/brand/logo_login.png" class="logo-login"
+                  ><img src="/img/brand/logo_login.jpg" class="logo-login"
                 /></small>
               </div>
             </div>
@@ -150,7 +150,7 @@ export default {
               this.$cookies.set("user_trailer_admin",obj.user)
               this.$cookies.set("nombres_trailer_admin",obj.nombres)
               //this.$cookies.set("token",obj.token)
-              this.$router.push("./dashboard");
+              this.$router.push("./evento");
             }
           });
         } else {

@@ -93,12 +93,18 @@
           <textarea
             class="form-control"
             placeholder="DETALLE NOTIFICACION"
+            v-model="texto_notification"
             rows="6"
           ></textarea>
 
           <div class="text-right" style="margin-top: 1rem">
-            <base-button type="danger" @click="">Cancelar</base-button>
-            <base-button type="primary" @click="" native-type="submit"
+            <base-button type="danger" @click="closeModal()"
+              >Cancelar</base-button
+            >
+            <base-button
+              type="primary"
+              @click="createWhatsApp()"
+              native-type="submit"
               >Guardar</base-button
             >
           </div>
@@ -209,6 +215,7 @@ export default {
       mListClientes: [],
 
       name_notification: null,
+      texto_notification: null,
     };
   },
   methods: {
@@ -292,6 +299,52 @@ export default {
           message: e.toString(),
         });
       }
+    },
+    createWhatsApp() {
+      try {
+        if (this.name_notification == null && this.texto_notification == null) {
+          this.$notify({
+            title: "NOTIFICACION",
+            message: "NO SE PERMITEN DATOS VACIOS",
+            type: "danger",
+          });
+          return
+        }
+
+        let data = JSON.stringify({
+          name: this.name_notification,
+          texto: this.texto_notification,
+        });
+
+        let config = {
+          method: "post",
+          maxBodyLength: Infinity,
+          url: process.env.baseUrl + "/notification.php/whatsapp",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        };
+
+        this.$axios
+          .request(config)
+          .then((response) => {
+            console.log(JSON.stringify(response.data));
+            this.readNotificacionAll();
+            this.closeModal();
+          })
+          .catch((error) => {
+            console.log(error);
+            alert(error.toString());
+          });
+      } catch (error) {
+        alert(error.toString());
+      }
+    },
+    closeModal() {
+      this.name_notification = null
+      this.texto_notification = null
+      this.modalAddNotification = false
     },
   },
   mounted() {

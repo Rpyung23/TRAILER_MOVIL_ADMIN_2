@@ -76,7 +76,11 @@
             >
             </el-table-column>
 
-            <el-table-column prop="html_content" label="DETALLE EMAIL" width="950">
+            <el-table-column
+              prop="html_content"
+              label="DETALLE EMAIL"
+              width="950"
+            >
               <template slot-scope="scope">
                 <div v-html="scope.row.html_content"></div>
               </template>
@@ -117,7 +121,6 @@
               >Guardar</base-button
             >
           </div>
-
         </modal>
       </div>
     </base-header>
@@ -208,7 +211,6 @@ export default {
           label: "U. FECHA",
           minWidth: 180,
         },
-
       ],
       modalAddEmail: false,
       editorOption: {
@@ -253,7 +255,7 @@ export default {
       },
       mListClientes: [],
       content_email: null,
-      name_content_email:null
+      name_content_email: null,
     };
   },
   methods: {
@@ -317,12 +319,10 @@ export default {
         var datos = await this.$axios.get(
           process.env.baseUrl + "/cliente.php/all_clientes"
         );
-        if (datos.data.status == 200) 
-        {
-          for(var i = 0;i<datos.data.datos.length > 0;i++)
-            {
-              this.mListClientes.push(datos.data.datos[i].email);
-            }
+        if (datos.data.status == 200) {
+          for (var i = 0; i < datos.data.datos.length > 0; i++) {
+            this.mListClientes.push(datos.data.datos[i].email);
+          }
         }
       } catch (e) {
         console.log(e);
@@ -338,48 +338,67 @@ export default {
         }
       );
 
-      if(datos.data.status_code == 200)
-      {
+      if (datos.data.status_code == 200) {
         Notification.success({
-            title: "CORREOS  ELECTRONICOS",
-            message: "ENVIADOS CON EXITO.....!",
-          });
-      }else{
+          title: "CORREOS  ELECTRONICOS",
+          message: "ENVIADOS CON EXITO.....!",
+        });
+      } else {
         Notification.error({
-            title: "ERROR CORREOS  ELECTRONICOS",
-            message: datos.data.msm
-          });
+          title: "ERROR CORREOS  ELECTRONICOS",
+          message: datos.data.msm,
+        });
       }
     },
-    saveNewNotification()
-    {
-      if(this.name_content_email != null){
-        if(this.content_email != null)
-        {
+    saveNewNotification() {
+      if (this.name_content_email != null) {
+        if (this.content_email != null) {
+          let data = JSON.stringify({
+            name: this.name_content_email,
+            html_content: this.content_email,
+          });
 
-          this.readNotificacionAll()
-          console.log(this.content_email)
+          let config = {
+            method: "post",
+            maxBodyLength: Infinity,
+            url: process.env.baseUrl + "/notification.php/email",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            data: data,
+          };
 
-        }else{
+          this.$axios
+            .request(config)
+            .then((response) => {
+              console.log(JSON.stringify(response.data));
+              if (response.data.status == 200) {
+                this.readNotificacionAll()
+                this.closeModalEmail()
+                console.log(this.content_email);
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else {
           Notification.info({
             title: "ERROR CORREOS  ELECTRONICO",
-            message: "PORFAVOR INGRESE EL CONTENIDO DEL CORREO"
+            message: "PORFAVOR INGRESE EL CONTENIDO DEL CORREO",
           });
         }
-      }else{
+      } else {
         Notification.info({
-            title: "ERROR CORREOS  ELECTRONICO",
-            message: "PORFAVOR INGRESE EL NOMBRE DEL CORREO"
-          });
+          title: "ERROR CORREOS  ELECTRONICO",
+          message: "PORFAVOR INGRESE EL NOMBRE DEL CORREO",
+        });
       }
-
-      
     },
-    closeModalEmail(){
-      this.name_content_email = null
-      this.content_email = null
-      this.modalAddEmail = false
-    }
+    closeModalEmail() {
+      this.name_content_email = null;
+      this.content_email = null;
+      this.modalAddEmail = false;
+    },
   },
   computed: {
     editor() {

@@ -56,24 +56,23 @@
             height="calc(100vh - 8.90rem)"
             style="width: 100%"
           >
-            <el-table-column  width="150">
-              <template slot-scope="scope"> 
-                <base-button
+            <el-table-column width="100">
+              <template slot-scope="scope">
+                <!--<base-button
                   size="sm"
                   title="EDITAR"
                   @click="showModalUpdateInfoUsuario(scope.row)"
                   type="primary"
                   ><i class="ni ni-ruler-pencil"></i
-                ></base-button>
+                ></base-button>-->
 
                 <base-button
                   size="sm"
                   title="ELIMINAR"
-                  @click="showModalUpdateInfoUsuario(scope.row)"
+                  @click="deleteEvento(scope.row.id_evento)"
                   type="danger"
                   ><i class="ni ni-fat-remove"></i
                 ></base-button>
-
               </template>
             </el-table-column>
 
@@ -107,7 +106,12 @@
         <modal :show.sync="modalAddEvento" size="lg">
           <div class="container_add_evento">
             <div class="input_add_evento_img">
-              <img id="imagenPrevisualizacionEvento" src="https://firebasestorage.googleapis.com/v0/b/trailer-movil.appspot.com/o/asset%2Fdefault.jpg?alt=media" style="max-width: 100%" alt="" />
+              <img
+                id="imagenPrevisualizacionEvento"
+                src="../static/img/image.jpg"
+                style="max-width: 100%; height: 25rem"
+                alt=""
+              />
 
               <base-button
                 for="fileInput"
@@ -123,6 +127,7 @@
                 id="fileInput"
                 class="hidden-file-input"
                 accept="image/*"
+                @change="changeFoto()"
               />
             </div>
 
@@ -131,6 +136,7 @@
                 prepend-icon="ni ni-diamond"
                 name="NOMBRE DEL EVENTO"
                 placeholder="NOMBRE DEL EVENTO"
+                v-model="nombre_evento"
                 rules="required"
               >
               </base-input>
@@ -140,6 +146,7 @@
                 name="UBCICACION DEL EVENTO"
                 placeholder="UBCICACION DEL EVENTO"
                 rules="required"
+                v-model="ubicacion_evento"
               >
               </base-input>
 
@@ -147,7 +154,7 @@
                 type="datetime"
                 placeholder="FECHA EVENTO"
                 style="width: 100%; margin-bottom: 1.5rem"
-                v-model="fechaInicial"
+                v-model="fecha_evento"
               >
               </el-date-picker>
 
@@ -156,6 +163,7 @@
                 name="PRECIO DEL EVENTO"
                 placeholder="PRECIO DEL EVENTO"
                 rules="required"
+                v-model="precio_evento"
               >
               </base-input>
 
@@ -164,6 +172,7 @@
                 name="CANT BOLETOS"
                 placeholder="CANT BOLETOS"
                 rules="required"
+                v-model="numBoletosDisponibles_evento"
               >
               </base-input>
 
@@ -173,10 +182,20 @@
                 placeholder="DETALLE EVENTO"
                 style="margin-bottom: 0rem"
                 rules="required"
+                v-model="detalle_evento"
               >
               </base-input>
             </div>
           </div>
+
+          <template slot="footer">
+            <base-button type="danger" class="ml-auto" @click="closeEvento()"
+              >CANCELAR
+            </base-button>
+            <base-button type="default" @click="saveEvento()"
+              >GUARDAR EVENTO</base-button
+            >
+          </template>
         </modal>
       </div>
     </base-header>
@@ -193,7 +212,11 @@ import {
   validarCorreoElectronico,
 } from "../util/validaciones";
 import "flatpickr/dist/flatpickr.css";
-import { getFecha_dd_mm_yyyy, FechaStringToHour } from "../util/fechas";
+import {
+  getFecha_dd_mm_yyyy,
+  FechaStringToHour,
+  getformatFechaDateTime,
+} from "../util/fechas";
 
 import {
   Table,
@@ -281,6 +304,25 @@ export default {
       ],
       modalAddEvento: false,
       img_src_evento: null,
+      firebaseConfig: {
+        apiKey: "AIzaSyBCq1qLjoJBKcZs9saFysslpNX2t7TT3Ak",
+        authDomain: "trailer-movil.firebaseapp.com",
+        projectId: "trailer-movil",
+        storageBucket: "trailer-movil.appspot.com",
+        messagingSenderId: "314437642188",
+        appId: "1:314437642188:web:c1f8cb95607d466a661f69",
+        measurementId: "G-CZLHZXV0ZH",
+      },
+      appFirebase: null,
+      oFileFoto: null,
+
+      nombre_evento: null,
+      detalle_evento: null,
+      ubicacion_evento: null,
+      foto_evento: null,
+      fecha_evento: null,
+      precio_evento: null,
+      numBoletosDisponibles_evento: null,
     };
   },
   methods: {
@@ -289,7 +331,7 @@ export default {
       this.mListEventos = [];
       try {
         var datos = await this.$axios.get(
-          process.env.baseUrl + "/evento.php?estado=all"
+          process.env.baseUrl + "/evento.php?estado=active"
         );
 
         if (datos.data.status == 200) {
@@ -319,15 +361,51 @@ export default {
       this.loadingEventos = false;
     },
     showModalAddEvento() {
+      /*document.getElementById("imagenPrevisualizacionEvento").src =
+        "./static/img/image.jpg";*/
       this.modalAddEvento = true;
     },
-  },
-  mounted() {
-    this.readEventoAll();
+    uploadImage() {
+      this.foto_evento = null;
+      var self = this;
 
-    const fileInput = document.getElementById("fileInput");
+      if (this.oFileFoto != null) {
+        // Crea una referencia al almacenamiento de Firebase con el nombre de archivo que deseas
+        var storageRef = firebase.storage().ref(this.oFileFoto.name);
 
-    fileInput.addEventListener("change", function (event) {
+        // Sube el archivo a Firebase Storage
+        var uploadTask = storageRef.put(this.oFileFoto);
+
+        // Monitorea el progreso de la carga (opcional)
+        uploadTask.on(
+          "state_changed",
+          function (snapshot) {
+            // Aquí puedes obtener información sobre el progreso de la carga si lo deseas
+            var progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Progreso de carga: " + progress + "%");
+          },
+          function (error) {
+            // Manejo de errores si ocurre alguno durante la carga
+            console.error("Error al cargar la foto:", error);
+          },
+          function () {
+            // Si la carga se completa exitosamente, puedes obtener la URL de la imagen
+            uploadTask.snapshot.ref
+              .getDownloadURL()
+              .then(function (downloadURL) {
+                self.foto_evento = downloadURL;
+                console.log("URL de la foto subida:", downloadURL);
+              });
+          }
+        );
+      } else {
+        console.log("FILE ES NULL");
+      }
+    },
+    changeFoto() {
+      console.log("CHANGUE FOTO");
+      var fileInput = document.getElementById("fileInput");
       // Los archivos seleccionados, pueden ser muchos o uno
       const archivos = fileInput.files;
       // Si no hay archivos salimos de la función y quitamos la imagen
@@ -337,13 +415,124 @@ export default {
         return;
       }
       // Ahora tomamos el primer archivo, el cual vamos a previsualizar
-      const primerArchivo = archivos[0];
+      this.oFileFoto = archivos[0];
       // Lo convertimos a un objeto de tipo objectURL
-      const objectURL = URL.createObjectURL(primerArchivo);
+      const objectURL = URL.createObjectURL(this.oFileFoto);
       // Y a la fuente de la imagen le ponemos el objectURL
       this.img_src_evento = objectURL;
-      document.getElementById("imagenPrevisualizacionEvento").src = objectURL
-    });
+      document.getElementById("imagenPrevisualizacionEvento").src = objectURL;
+      this.uploadImage();
+    },
+    saveEvento() {
+      try {
+        if (
+          this.nombre_evento == null &&
+          this.detalle_evento == null &&
+          this.ubicacion_evento == null &&
+          this.fecha_evento == null &&
+          this.precio_evento == null &&
+          this.numBoletosDisponibles_evento == null
+        ) {
+          this.$notify({
+            title: "Evento",
+            message: "NO SE PERMITEN DATOS VACIOS",
+            type:"danger"
+          });
+          return
+        }
+
+        let data = JSON.stringify({
+          nombre: this.nombre_evento,
+          detalle: this.detalle_evento,
+          ubicacion: this.ubicacion_evento,
+          foto: this.foto_evento,
+          fecha_evento: getformatFechaDateTime(this.fecha_evento),
+          precio: this.precio_evento == null ? 500 : this.precio_evento,
+          numBoletosDisponibles:
+            this.numBoletosDisponibles_evento == null
+              ? 0.0
+              : this.numBoletosDisponibles_evento,
+        });
+
+        console.log(data);
+
+        let config = {
+          method: "post",
+          maxBodyLength: Infinity,
+          url: process.env.baseUrl + "/evento.php",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        };
+
+        this.$axios
+          .request(config)
+          .then((response) => {
+            console.log(JSON.stringify(response.data));
+            if (response.data.status == 200) {
+              this.readEventoAll();
+              this.closeEvento()
+            } else {
+              alert("NO SE REGISTRO EL EVENTO");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            alert(error.toString());
+          });
+      } catch (error) {
+        alert(error.toString());
+      }
+    },
+    closeEvento() {
+      this.nombre_evento = null;
+      this.detalle_evento = null;
+      this.ubicacion_evento = null;
+      this.foto_evento = null;
+      this.fecha_evento = null;
+      this.precio_evento = null;
+      this.numBoletosDisponibles_evento = null;
+      this.modalAddEvento = false;
+    },
+    deleteEvento(id_evento) {
+      try {
+        let data = JSON.stringify({
+          id_evento: id_evento,
+        });
+
+        let config = {
+          method: "delete",
+          maxBodyLength: Infinity,
+          url: process.env.baseUrl + "/evento.php",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        };
+
+        this.$axios
+          .request(config)
+          .then((response) => {
+            if (response.data.status == 200) {
+              this.readEventoAll();
+            } else {
+              alert("NO SE PUDO ELIMINAR EL EVENTO");
+            }
+          })
+          .catch((error) => {
+            alert(error.toString());
+            console.log(error);
+          });
+      } catch (error) {
+        alert(error.toString());
+      }
+    },
+  },
+  mounted() {
+    this.appFirebase = firebase.initializeApp(this.firebaseConfig);
+
+    this.readEventoAll();
   },
 };
 </script>
@@ -352,7 +541,7 @@ export default {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  /*width: 100%;*/
   height: 100%;
   opacity: 0;
   cursor: pointer;
