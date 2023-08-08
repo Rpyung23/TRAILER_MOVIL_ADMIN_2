@@ -130,6 +130,8 @@ module.exports = {
     env: {
         baseUrl: process.env.baseUrl || 'http://localhost:80/TrailerMovilApiRest/view',
         baseUrlNodeJS: process.env.baseUrlNodeJS || 'http://localhost:3002',
+        /*baseUrl: 'https://rest.roman-company.com',
+        baseUrlNodeJS: 'http://localhost:3002',*/
         mapaCredencial: process.env.mapaCredencial || 'AIzaSyCMR83z2AyaiNJTfUHKechVpGh_MjLQvHA'
     }
 }

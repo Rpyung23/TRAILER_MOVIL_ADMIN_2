@@ -16,6 +16,18 @@
         <sidebar-item
           translate="no"
           :link="{
+            name: 'Evento Ticket',
+            icon: 'ni ni-single-copy-04 text-warning',
+            path: './evento_ticket',
+          }"
+        >
+        </sidebar-item>
+
+        
+
+        <sidebar-item
+          translate="no"
+          :link="{
             name: 'Mapa',
             icon: 'ni ni-pin-3 text-success',
             path: './mapa',

@@ -56,6 +56,9 @@
             height="calc(100vh - 8.90rem)"
             style="width: 100%"
           >
+
+          
+
             <el-table-column width="100">
               <template slot-scope="scope">
                 <!--<base-button
@@ -68,11 +71,15 @@
 
                 <base-button
                   size="sm"
+                  v-if="scope.row.numBoletosDisponibles > 0"
                   title="ELIMINAR"
                   @click="deleteEvento(scope.row.id_evento)"
                   type="danger"
                   ><i class="ni ni-fat-remove"></i
                 ></base-button>
+
+                <badge v-if="scope.row.numBoletosDisponibles <= 0" type="danger" class="mr-2">AGOTADO</badge>
+
               </template>
             </el-table-column>
 

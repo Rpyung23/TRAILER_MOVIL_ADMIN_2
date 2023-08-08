@@ -89,39 +89,6 @@
         </template>
       </base-dropdown>
     </ul>
-
-    <!--Classic modal-->
-    <modal :show.sync="ModalClasicAjustes" size="lg">
-      <h6 slot="header" class="modal-title">NOTIFICACIONES</h6>
-
-      <el-table
-        class="table table-striped table-flush align-items-center mb-0"
-        :data="mListNotifications"
-        height="calc(50vh)"
-        style="width: 100%"
-      >
-        <!--<el-table-column label="" width="100">
-          <template>
-            <base-button
-              size="sm"
-              icon="ni ni-circle-08 pt-1"
-              type="info"
-            ></base-button>
-          </template>
-        </el-table-column>-->
-        <el-table-column label="PILA" width="270" prop="nombre_lote">
-        </el-table-column>
-        <el-table-column label="FASE" width="250" prop="detalleFase">
-          <template slot-scope="scope">
-                <badge type="primary" class="mr-2">{{scope.row.detalleFase}}</badge>
-              </template>
-        </el-table-column>
-        <el-table-column label="Procedencia - Sector" width="230" prop="nombre_mercado">
-        </el-table-column>
-      </el-table>
-
-      <template slot="footer"> </template>
-    </modal>
   </base-nav>
 </template>
 <script>
@@ -193,7 +160,7 @@ export default {
     return {
       ModalClasicAjustes: false,
       hora: "00:00:00",
-      nameUsuario: "SIN NOMBRE",
+      nameUsuario: "ADMINISTRADOR",
       mListaAlertasDispositivosNotificaciones: [],
       mListaAlertasDispositivosNotificacionesAux: [],
       logo: "../img/brand/logo_login.jpg",
@@ -234,44 +201,9 @@ export default {
     hideSidebar() {
       this.$sidebar.displaySidebar(false);
     },
-    async readNotificationAll() {
-      
-      this.mListNotifications = []
-      try {
-        var datos = await this.$axios.post(
-          process.env.baseUrl + "/notification",
-          { token: this.token }
-        )
-        this.mListNotifications.push(...datos.data.datos)
-
-        if(this.mListNotifications.length > 0 )
-        {
-          this.ModalClasicAjustes = true
-        }
-      } catch (error) {
-        console.log(error);
-    }}
   },
   mounted() {
-    /*this.mueveReloj();*/
-    
-    this.readNotificationAll()
-
-    try {
-      var token = this.$cookies.get("token");
-      var data = jwt_decode(token).datosJWT;
-      this.nameUsuario = data.NombresApellidos;
-      if(data.activeRecordatorio == 1){
-        this.notificationPermiso = true
-      }
-    } catch (error) {
-      this.nameEmpresa = error.toString();
-    }
-
     this.hrefLogOut = "./login";
-    /*setInterval(() => {
-      this.mueveReloj();
-    }, 1000);*/
   },
 };
 </script>
