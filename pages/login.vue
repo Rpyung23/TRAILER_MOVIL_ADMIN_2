@@ -150,7 +150,7 @@ export default {
               this.$cookies.set("user_trailer_admin",obj.user)
               this.$cookies.set("nombres_trailer_admin",obj.nombres)
               //this.$cookies.set("token",obj.token)
-              this.$router.push("./evento");
+              this.$router.push("/evento");
             }
           });
         } else {

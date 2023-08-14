@@ -8,7 +8,7 @@
           :link="{
             name: 'Evento',
             icon: 'ni ni-note-03 text-info',
-            path: './evento',
+            path: '/evento',
           }"
         >
         </sidebar-item>
@@ -18,7 +18,7 @@
           :link="{
             name: 'Evento Ticket',
             icon: 'ni ni-single-copy-04 text-warning',
-            path: './evento_ticket',
+            path: '/evento_ticket',
           }"
         >
         </sidebar-item>
@@ -30,7 +30,7 @@
           :link="{
             name: 'Mapa',
             icon: 'ni ni-pin-3 text-success',
-            path: './mapa',
+            path: '/mapa',
           }"
         >
         </sidebar-item>
@@ -40,7 +40,7 @@
           :link="{
             name: 'Notificaciones',
             icon: 'ni ni-notification-70 text-danger',
-            path: './notificacion',
+            path: '/notificacion',
           }"
         >
         </sidebar-item>
@@ -50,7 +50,7 @@
           :link="{
             name: 'Emails',
             icon: 'ni ni-email-83 text-default',
-            path: './email',
+            path: '/email',
           }"
         >
         </sidebar-item>

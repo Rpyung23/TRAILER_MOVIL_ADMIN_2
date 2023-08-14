@@ -128,10 +128,10 @@ module.exports = {
         }
     },
     env: {
-        baseUrl: process.env.baseUrl || 'http://localhost:80/TrailerMovilApiRest/view',
-        baseUrlNodeJS: process.env.baseUrlNodeJS || 'http://localhost:3002',
-        /*baseUrl: 'https://rest.roman-company.com',
-        baseUrlNodeJS: 'http://localhost:3002',*/
+        /*baseUrl: process.env.baseUrl || 'http://localhost:80/TrailerMovilApiRest/view',
+        baseUrlNodeJS: process.env.baseUrlNodeJS || 'http://localhost:3002',*/
+        baseUrl: 'https://rest.roman-company.com/view',
+        baseUrlNodeJS: 'https://trailer-api.onrender.com',
         mapaCredencial: process.env.mapaCredencial || 'AIzaSyCMR83z2AyaiNJTfUHKechVpGh_MjLQvHA'
     }
 }
